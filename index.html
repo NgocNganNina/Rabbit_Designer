@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nina Pham — Masterpiece Rabbit Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #f5ecd9; --bg-2: #ead9bb; --paper: #faf3e3;
+    --ink: #2a1a10; --ink-soft: #5a4332; --muted: #9a8268;
+    --accent: #c9603c; --accent-2: #e07b3e;
+    --sage: #7a8b5c; --gold: #c89849;
+    --line: rgba(42, 26, 16, 0.12);
+    --line-strong: rgba(42, 26, 16, 0.25);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    overflow: hidden; background: var(--bg); color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: 'Fraunces', serif; }
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse at 12% 5%, rgba(255, 220, 180, 0.75), transparent 50%),
+      radial-gradient(ellipse at 88% 95%, rgba(122, 139, 92, 0.22), transparent 50%),
+      radial-gradient(circle at 50% 55%, var(--paper), var(--bg) 80%);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: 
+      repeating-linear-gradient(45deg, transparent 0 2px, rgba(42, 26, 16, 0.018) 2px 4px),
+      radial-gradient(circle at 50% 50%, transparent 45%, rgba(42, 26, 16, 0.07) 100%);
+  }
+  #scene-canvas {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    cursor: grab; z-index: 1;
+  }
+  #scene-canvas:active { cursor: grabbing; }
+  .topbar {
+    position: fixed; top: 16px; left: 16px; right: 16px; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between;
+    pointer-events: none;
+  }
+  .topbar > * { pointer-events: auto; }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(250, 243, 227, 0.88);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 16px;
+    padding: 8px 16px 8px 8px;
+    box-shadow: 0 8px 24px -10px rgba(42, 26, 16, 0.28);
+  }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--ink); color: var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 12px rgba(42,26,16,0.3);
+  }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 13px;
+    background: rgba(250, 243, 227, 0.88);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--line); border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: var(--ink);
+  }
+  .pulse-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--sage);
+    box-shadow: 0 0 0 0 rgba(122, 139, 92, 0.7);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(122, 139, 92, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(122, 139, 92, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(122, 139, 92, 0); }
+  }
+  .panel {
+    position: fixed; top: 78px;
+    background: rgba(250, 243, 227, 0.82);
+    backdrop-filter: blur(16px) saturate(1.15);
+    border: 1px solid var(--line); border-radius: 22px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset, 0 24px 50px -20px rgba(42, 26, 16, 0.32);
+    overflow-y: auto; z-index: 10;
+  }
+  .panel-left { left: 16px; width: 330px; padding: 20px; bottom: 70px; }
+  .panel-right { right: 16px; width: 280px; padding: 20px; bottom: 70px; }
+  .section-label {
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+    margin-bottom: 9px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .name-input-panel {
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    outline: none;
+    transition: all 0.25s ease;
+  }
+  .name-input-panel:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 96, 60, 0.2);
+  }
+  .name-chip {
+    background: rgba(250, 243, 227, 0.9);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .name-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    background: var(--paper);
+  }
+  .swatch {
+    position: relative; width: 100%; aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid rgba(42, 26, 16, 0.15);
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: 0 2px 6px rgba(42, 26, 16, 0.12);
+  }
+  .swatch::before {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 96, 60, 0.55), transparent 70%);
+    opacity: 0; transition: opacity 0.3s ease;
+    pointer-events: none; filter: blur(5px); z-index: -1;
+  }
+  .swatch:hover {
+    transform: scale(1.2) translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 96, 60, 0.2), 0 12px 22px rgba(201, 96, 60, 0.35);
+  }
+  .swatch:hover::before { opacity: 1; }
+  .swatch.active {
+    transform: scale(1.1); border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent), 0 8px 16px rgba(201, 96, 60, 0.4);
+  }
+  .swatch.active::after {
+    content: ''; position: absolute; inset: -7px; border-radius: 50%;
+    border: 1.5px dashed var(--accent);
+    animation: spin 10s linear infinite; pointer-events: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pill-btn {
+    position: relative; background: var(--paper);
+    border: 1px solid var(--line); border-radius: 12px;
+    padding: 8px 6px; font-size: 11px; font-weight: 500;
+    color: var(--ink-soft); cursor: pointer;
+    transition: all 0.25s ease; overflow: visible; text-align: center;
+    font-family: 'Outfit', sans-serif;
+  }
+  .pill-btn::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 14px;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 96, 60, 0.45), transparent 70%);
+    opacity: 0; transition: opacity 0.3s ease;
+    pointer-events: none; filter: blur(7px); z-index: -1;
+  }
+  .pill-btn:hover {
+    transform: translateY(-2px); border-color: var(--accent);
+    color: var(--ink); box-shadow: 0 7px 16px -4px rgba(201, 96, 60, 0.45);
+  }
+  .pill-btn:hover::before { opacity: 1; }
+  .pill-btn.active {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+    box-shadow: 0 7px 16px -4px rgba(42, 26, 16, 0.55);
+  }
+  .action-btn {
+    position: relative; background: var(--paper);
+    border: 1px solid var(--line); border-radius: 14px;
+    padding: 11px 8px; cursor: pointer;
+    transition: all 0.3s ease; overflow: visible;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--ink); font-family: 'Outfit', sans-serif;
+  }
+  .action-btn::before {
+    content: ''; position: absolute; inset: -3px; border-radius: 16px;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 96, 60, 0.5), transparent 70%);
+    opacity: 0; transition: opacity 0.3s ease;
+    pointer-events: none; filter: blur(9px); z-index: -1;
+  }
+  .action-btn:hover {
+    transform: translateY(-3px); border-color: var(--accent);
+    box-shadow: 0 14px 28px -10px rgba(201, 96, 60, 0.5);
+  }
+  .action-btn:hover::before { opacity: 1; }
+  .action-btn:hover .action-icon { color: var(--accent); transform: scale(1.1); }
+  .action-btn.active {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+  .action-btn.active .action-icon { color: var(--accent-2); }
+  .action-btn.active::before {
+    background: radial-gradient(circle at 50% 50%, rgba(224, 123, 62, 0.65), transparent 70%);
+    opacity: 1;
+  }
+  .action-icon { width: 24px; height: 24px; color: var(--ink); transition: all 0.3s ease; }
+  .action-icon svg { width: 100%; height: 100%; }
+  .action-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; }
+  .name-plate {
+    position: fixed; bottom: 46px; left: 50%;
+    transform: translateX(-50%); z-index: 15;
+    background: linear-gradient(180deg, rgba(250, 243, 227, 0.96), rgba(234, 217, 187, 0.96));
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--line); border-radius: 20px;
+    padding: 10px 20px; display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 20px 50px -20px rgba(42, 26, 16, 0.42);
+  }
+  .name-input {
+    background: transparent; border: none; outline: none;
+    font-family: 'Fraunces', serif; font-size: 19px; font-weight: 700;
+    color: var(--ink); width: 140px; padding: 0;
+  }
+  .marquee {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 32px;
+    background: var(--ink); color: var(--paper);
+    z-index: 12; overflow: hidden;
+    display: flex; align-items: center; pointer-events: none;
+  }
+  .marquee-content {
+    display: flex; gap: 40px; white-space: nowrap;
+    animation: marquee 50s linear infinite;
+    font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 500;
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .toast {
+    position: fixed; top: 80px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--ink); color: var(--paper);
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 12px; font-weight: 500;
+    opacity: 0; transition: all 0.4s ease;
+    pointer-events: none; z-index: 100;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  .stat-row {
+    display: flex; justify-content: space-between; gap: 8px;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .stat-row .v { color: var(--accent); font-weight: 700; }
+  @media (max-width: 1100px) {
+    .panel-left, .panel-right {
+      top: 70px; bottom: auto; max-height: calc(100vh - 200px);
+      width: 260px; padding: 14px;
+    }
+    .panel-left { left: 12px; }
+    .panel-right { right: 12px; }
+    .name-plate { bottom: 42px; padding: 8px 14px; }
+    .name-input { width: 110px; font-size: 16px; }
+    .topbar .desktop-only { display: none; }
+  }
+  @media (max-width: 760px) {
+    .panel-left, .panel-right {
+      width: calc(50% - 14px); max-height: 34vh; padding: 10px;
+    }
+    .panel-left { left: 8px; }
+    .panel-right { right: 8px; }
+    .brand-mark { width: 32px; height: 32px; }
+    .name-plate { bottom: 38px; padding: 6px 10px; gap: 8px; }
+    .name-input { width: 80px; font-size: 14px; }
+    .name-plate > div:last-child { display: none; }
+  }
+</style>
+</head>
+<body>
+  <canvas id="scene-canvas"></canvas>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24">
+          <ellipse cx="8.5" cy="7" rx="1.8" ry="5" fill="currentColor"/>
+          <ellipse cx="15.5" cy="7" rx="1.8" ry="5" fill="currentColor"/>
+          <circle cx="12" cy="16" r="5" fill="currentColor"/>
+          <circle cx="10" cy="15" r="0.8" fill="#2a1a10"/>
+          <circle cx="14" cy="15" r="0.8" fill="#2a1a10"/>
+        </svg>
+      </div>
+      <div>
+        <div class="display" style="font-size: 16px; font-weight: 700; line-height: 1;">Warren Atelier</div>
+        <div style="font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 3px;">High-Fidelity 3D Rabbit Studio · Pro Edition</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 desktop-only">
+      <span class="pill"><span class="pulse-dot"></span>Studio Engine 3D</span>
+      <span class="pill" style="color: var(--ink-soft);">Drag to orbit · Scroll to zoom · Click to interact</span>
+    </div>
+  </div>
+
+  <aside class="panel panel-left">
+    <div class="section-label">Identity</div>
+    <div style="margin-bottom: 18px;">
+      <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 8px;">
+        <input id="panel-rabbit-name" class="name-input-panel" value="Mochi" maxlength="16" placeholder="Name your rabbit..." />
+        <button id="random-name-btn" class="pill-btn" title="Random name" style="padding: 8px 12px; font-size: 14px; display: flex; align-items: center; justify-content: center;">
+          🎲
+        </button>
+      </div>
+      <div id="quick-names" class="flex flex-wrap gap-1"></div>
+    </div>
+
+    <div class="section-label">Customize</div>
+    <h2 class="display" style="font-size: 21px; font-weight: 700; line-height: 1.1; margin: 0 0 3px;">Sculpt & Dress</h2>
+    <p style="font-size: 11px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.45;">Hover to preview swatches. Click to apply styling.</p>
+    
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Fur Coat · <span id="body-name" style="color: var(--ink); font-weight: 700; letter-spacing: 0.05em;">Apricot</span></div>
+      <div id="body-swatches" class="grid grid-cols-8 gap-1.5"></div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Inner Ear & Pads · <span id="inner-name" style="color: var(--ink); font-weight: 700; letter-spacing: 0.05em;">Blush</span></div>
+      <div id="inner-swatches" class="grid grid-cols-8 gap-1.5"></div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Gem Eyes · <span id="eyes-name" style="color: var(--ink); font-weight: 700; letter-spacing: 0.05em;">Onyx</span></div>
+      <div id="eyes-swatches" class="grid grid-cols-8 gap-1.5"></div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Button Nose · <span id="nose-name" style="color: var(--ink); font-weight: 700; letter-spacing: 0.05em;">Blush</span></div>
+      <div id="nose-swatches" class="grid grid-cols-8 gap-1.5"></div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Coat Markings · <span id="pattern-name" style="color: var(--ink); font-weight: 700; letter-spacing: 0.05em;">Pure Snow</span></div>
+      <div id="pattern-pills" class="grid grid-cols-3 gap-1.5 mb-2"></div>
+      <div id="pattern-swatches" class="grid grid-cols-8 gap-1.5"></div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="section-label">Ear Posture</div>
+      <div id="ear-pills" class="grid grid-cols-3 gap-1.5"></div>
+    </div>
+    <div>
+      <div class="section-label">Accessories</div>
+      <div id="accessory-pills" class="grid grid-cols-3 gap-1.5"></div>
+    </div>
+  </aside>
+
+  <aside class="panel panel-right">
+    <div class="section-label">Action & Motion</div>
+    <h2 class="display" style="font-size: 21px; font-weight: 700; line-height: 1.1; margin: 0 0 3px;">Living Behaviors</h2>
+    <p style="font-size: 11px; color: var(--ink-soft); margin: 0 0 16px; line-height: 1.45;">Experience reactive organic physics and cute gestures.</p>
+    <div id="action-grid" class="grid grid-cols-2 gap-2"></div>
+    
+    <div class="section-label" style="margin-top: 22px;">Studio Tools</div>
+    <button id="randomize-btn" class="action-btn" style="width: 100%; margin-bottom: 8px;">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 3h5v5"/><path d="M8 21H3v-5"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>
+        </svg>
+      </div>
+      <span class="action-label">Surprise Breed</span>
+    </button>
+    <button id="reset-btn" class="action-btn" style="width: 100%;">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>
+        </svg>
+      </div>
+      <span class="action-label">Reset Camera</span>
+    </button>
+    
+    <div class="section-label" style="margin-top: 22px;">Model Specifications</div>
+    <p style="font-size: 11px; color: var(--ink-soft); line-height: 1.55; margin: 0;">
+      Upgraded with high-density procedural anatomy, multi-tier velvet fur shaders, organic ear spring-dynamics, curved whiskers, and accessory slots.
+    </p>
+  </aside>
+
+  <div class="name-plate">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent);"></div>
+      <div>
+        <div style="font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);">Certificate of Pedigree</div>
+        <input id="rabbit-name" class="name-input" value="Mochi" maxlength="16" aria-label="Rabbit name"/>
+      </div>
+    </div>
+    <div style="width: 1px; height: 34px; background: var(--line);"></div>
+    <div style="display: flex; flex-direction: column; gap: 3px; min-width: 80px;">
+      <div class="stat-row"><span>Fluff</span><span class="v" id="stat-fluff">A+</span></div>
+      <div class="stat-row"><span>Whimsy</span><span class="v" id="stat-whimsy">96</span></div>
+      <div class="stat-row"><span>Charm</span><span class="v" id="stat-charm">99</span></div>
+    </div>
+  </div>
+
+  <div class="marquee">
+    <div class="marquee-content">
+      <span>★ Warren Atelier Masterpiece 3D Model</span><span>·</span>
+      <span>Organic Geometry & Velvet Rim Shader</span><span>·</span>
+      <span>Spring Physics & Reactive Expression</span><span>·</span>
+      <span>Dutch, Spots, & Harlequin Markings</span><span>·</span>
+      <span>Accessories & Interactive Living Poses</span><span>·</span>
+      <span>★ Warren Atelier Masterpiece 3D Model</span><span>·</span>
+      <span>Organic Geometry & Velvet Rim Shader</span><span>·</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    // ============== 调色板与配置 ==============
+    const palettes = {
+      body: [
+        { name: 'Apricot', color: '#e8a872' }, { name: 'Cream', color: '#f7eee1' },
+        { name: 'Caramel', color: '#b8794a' }, { name: 'Chocolate', color: '#553625' },
+        { name: 'Charcoal', color: '#323232' }, { name: 'Pure Snow', color: '#ffffff' },
+        { name: 'Lilac Grey', color: '#b9aba0' }, { name: 'Sage Green', color: '#97a888' }
+      ],
+      inner: [
+        { name: 'Blush', color: '#ff9db6' }, { name: 'Pastel Coral', color: '#ff8293' },
+        { name: 'Peach', color: '#ffc6a8' }, { name: 'Soft Mauve', color: '#cca0b0' },
+        { name: 'Warm Milk', color: '#fff3e0' }, { name: 'Rose Petal', color: '#eb6787' },
+        { name: 'Salmon Tint', color: '#ffa285' }, { name: 'Ivory', color: '#f7ebd9' }
+      ],
+      eyes: [
+        { name: 'Onyx', color: '#161616' }, { name: 'Hazel Honey', color: '#663e23' },
+        { name: 'Sapphire', color: '#3a6699' }, { name: 'Emerald', color: '#3a7d52' },
+        { name: 'Amber Gold', color: '#c98a3a' }, { name: 'Ruby Wine', color: '#962b41' },
+        { name: 'Amethyst', color: '#6d3969' }, { name: 'Sky Cyan', color: '#569bc9' }
+      ],
+      nose: [
+        { name: 'Blush', color: '#ff7e90' }, { name: 'Coral Kiss', color: '#ff6274' },
+        { name: 'Dark Rose', color: '#c94459' }, { name: 'Warm Peach', color: '#ffad9b' },
+        { name: 'Soft Mauve', color: '#af5e70' }
+      ],
+      pattern: [
+        { name: 'Cocoa', color: '#533423' }, { name: 'Mocha', color: '#7a5136' },
+        { name: 'Charcoal', color: '#2b2b2b' }, { name: 'Honey Gold', color: '#cb9b4c' },
+        { name: 'Sage Earth', color: '#798b5e' }, { name: 'Ruby Red', color: '#882b3d' },
+        { name: 'Plum Velvet', color: '#542946' }, { name: 'Snow White', color: '#ffffff' }
+      ]
+    };
+
+    const namePool = ['Mochi', 'Clover', 'Boba', 'Peanut', 'Luna', 'Biscuit', 'Pepper', 'Pip', 'Daisy', 'Bunbun', 'Matcha', 'Coco', 'Waffles', 'Pudding', 'Caramel', 'Hazel', 'Willow'];
+
+    const patternOptions = [
+      { id: 'solid', name: 'Solid' },
+      { id: 'dutch', name: 'Dutch Blaze' },
+      { id: 'spotted', name: 'Spotted' },
+      { id: 'patch', name: 'Eye Patch' },
+      { id: 'harlequin', name: 'Harlequin' },
+      { id: 'socks', name: 'Booties' }
+    ];
+
+    const earOptions = [
+      { id: 'upright', name: 'Perky Upright' },
+      { id: 'lop', name: 'Floppy Lop' },
+      { id: 'tilt', name: 'Airplane Tilt' }
+    ];
+
+    const accessoryOptions = [
+      { id: 'none', name: 'None' },
+      { id: 'bow', name: 'Silk Bow' },
+      { id: 'bell', name: 'Bell Collar' },
+      { id: 'crown', name: 'Flora Crown' },
+      { id: 'carrot', name: 'Crisp Carrot' }
+    ];
+
+    const actions = [
+      { id: 'idle', name: 'Idle & Sniff', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5"/><path d="M5 12a7 7 0 0 1 14 0" opacity="0.4"/><path d="M3 12a9 9 0 0 1 18 0" opacity="0.22"/></svg>' },
+      { id: 'binky', name: 'Joy Binky!', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>' },
+      { id: 'hop', name: 'Hop Around', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18 C 8 4, 16 4, 20 18"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></svg>' },
+      { id: 'munch', name: 'Carrot Feast', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L8 7 M12 3 L16 7 M12 3 L12 7"/><path d="M8 7 L12 21 L16 7 Z"/><path d="M10 11 L14 11 M10 15 L14 15" opacity="0.55"/></svg>' },
+      { id: 'groom', name: 'Paw Groom', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11c0-2.2 1.8-4 4-4s4 1.8 4 4"/><circle cx="12" cy="12" r="9"/><path d="M9 16c1 .5 2 .5 3 0"/></svg>' },
+      { id: 'sleep', name: 'Cozy Loaf', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13 A 8 8 0 1 1 11 4 A 6 6 0 0 0 20 13 Z"/></svg>' }
+    ];
+
+    // ============== 全局状态 ==============
+    const state = {
+      rabbit: null, scene: null, camera: null, renderer: null, controls: null,
+      clock: new THREE.Clock(),
+      lastInteraction: 0,
+      sparkles: null, ambientParticles: null, zSystem: null, crumbSystem: null,
+      current: {
+        body: '#e8a872', bodyName: 'Apricot',
+        inner: '#ff9db6', innerName: 'Blush',
+        eyes: '#161616', eyesName: 'Onyx',
+        nose: '#ff7e90', noseName: 'Blush',
+        pattern: '#533423', patternName: 'Cocoa',
+        patternType: 'solid',
+        earStyle: 'upright',
+        accessory: 'none',
+        action: 'idle'
+      }
+    };
+
+    // ============== 粒子系统 ==============
+    function createParticleTexture(color = 'rgba(255, 240, 217, 1)') {
+      const c = document.createElement('canvas');
+      c.width = c.height = 64;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, color);
+      g.addColorStop(0.35, color.replace('1)', '0.6)'));
+      g.addColorStop(1, color.replace('1)', '0)'));
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function createZTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = 'rgba(122, 139, 92, 1)';
+      ctx.font = 'bold 88px Fraunces, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('z', 64, 68);
+      return new THREE.CanvasTexture(c);
+    }
+
+    function createAmbientParticles() {
+      const count = 75;
+      const positions = new Float32Array(count * 3);
+      const speeds = new Float32Array(count);
+      const offsets = new Float32Array(count);
+      for (let i = 0; i < count; i++) {
+        const r = 2.2 + Math.random() * 4.5;
+        const theta = Math.random() * Math.PI * 2;
+        positions[i * 3] = Math.cos(theta) * r;
+        positions[i * 3 + 1] = Math.random() * 4.2;
+        positions[i * 3 + 2] = Math.sin(theta) * r;
+        speeds[i] = 0.06 + Math.random() * 0.16;
+        offsets[i] = Math.random() * Math.PI * 2;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const tex = createParticleTexture();
+      const mat = new THREE.PointsMaterial({
+        map: tex, size: 0.13, sizeAttenuation: true,
+        transparent: true, opacity: 0.55,
+        depthWrite: false, color: 0xfff0d9,
+        blending: THREE.AdditiveBlending
+      });
+      const points = new THREE.Points(geo, mat);
+      points.userData = { positions, speeds, offsets, count };
+      points.frustumCulled = false;
+      return points;
+    }
+
+    function updateAmbient(dt, t) {
+      const p = state.ambientParticles;
+      const ud = p.userData;
+      for (let i = 0; i < ud.count; i++) {
+        ud.positions[i * 3 + 1] += ud.speeds[i] * dt;
+        if (ud.positions[i * 3 + 1] > 4.2) ud.positions[i * 3 + 1] = -0.2;
+        ud.positions[i * 3] += Math.sin(t * 0.5 + ud.offsets[i]) * 0.0018;
+        ud.positions[i * 3 + 2] += Math.cos(t * 0.4 + ud.offsets[i]) * 0.0018;
+      }
+      p.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function createSparkleSystem() {
+      const max = 100;
+      const positions = new Float32Array(max * 3);
+      const velocities = new Float32Array(max * 3);
+      const lifetimes = new Float32Array(max);
+      for (let i = 0; i < max; i++) {
+        positions[i * 3] = 9999;
+        positions[i * 3 + 1] = 9999;
+        positions[i * 3 + 2] = 9999;
+        lifetimes[i] = 0;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const tex = createParticleTexture('rgba(255, 230, 175, 1)');
+      const mat = new THREE.PointsMaterial({
+        map: tex, size: 0.22, sizeAttenuation: true,
+        transparent: true, opacity: 0.95,
+        depthWrite: false, color: 0xffe1a8,
+        blending: THREE.AdditiveBlending
+      });
+      const points = new THREE.Points(geo, mat);
+      points.frustumCulled = false;
+      return { points, positions, velocities, lifetimes, max, next: 0 };
+    }
+
+    function spawnSparkles(origin = new THREE.Vector3(0, 1.2, 0), color = 0xffe1a8) {
+      const s = state.sparkles;
+      s.points.material.color.set(color);
+      for (let i = 0; i < 20; i++) {
+        const idx = s.next;
+        s.next = (s.next + 1) % s.max;
+        const angle = Math.random() * Math.PI * 2;
+        const r = 0.2 + Math.random() * 0.7;
+        s.positions[idx * 3] = origin.x + Math.cos(angle) * r;
+        s.positions[idx * 3 + 1] = origin.y + (Math.random() - 0.2) * 1.2;
+        s.positions[idx * 3 + 2] = origin.z + Math.sin(angle) * r;
+        s.velocities[idx * 3] = (Math.random() - 0.5) * 1.8;
+        s.velocities[idx * 3 + 1] = Math.random() * 1.4 + 0.4;
+        s.velocities[idx * 3 + 2] = (Math.random() - 0.5) * 1.8;
+        s.lifetimes[idx] = 0.8 + Math.random() * 0.6;
+      }
+      s.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function updateSparkles(dt) {
+      const s = state.sparkles;
+      for (let i = 0; i < s.max; i++) {
+        if (s.lifetimes[i] > 0) {
+          s.lifetimes[i] -= dt;
+          s.positions[i * 3] += s.velocities[i * 3] * dt;
+          s.positions[i * 3 + 1] += s.velocities[i * 3 + 1] * dt;
+          s.positions[i * 3 + 2] += s.velocities[i * 3 + 2] * dt;
+          s.velocities[i * 3] *= 0.92;
+          s.velocities[i * 3 + 1] = s.velocities[i * 3 + 1] * 0.95 - 0.7 * dt;
+          s.velocities[i * 3 + 2] *= 0.92;
+          if (s.lifetimes[i] <= 0) {
+            s.positions[i * 3] = 9999;
+            s.positions[i * 3 + 1] = 9999;
+            s.positions[i * 3 + 2] = 9999;
+          }
+        }
+      }
+      s.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function createZSystem() {
+      const max = 6;
+      const positions = new Float32Array(max * 3);
+      for (let i = 0; i < max; i++) positions[i * 3] = 9999;
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const tex = createZTexture();
+      const mat = new THREE.PointsMaterial({
+        map: tex, size: 0.48, sizeAttenuation: true,
+        transparent: true, opacity: 0.9,
+        depthWrite: false, color: 0x7a8b5c
+      });
+      const points = new THREE.Points(geo, mat);
+      points.frustumCulled = false;
+      return { points, positions, ages: new Array(max).fill(-1), max, next: 0 };
+    }
+
+    function spawnZ() {
+      const z = state.zSystem;
+      const idx = z.next;
+      z.next = (z.next + 1) % z.max;
+      z.positions[idx * 3] = 0.35 + (Math.random() - 0.5) * 0.2;
+      z.positions[idx * 3 + 1] = 1.85;
+      z.positions[idx * 3 + 2] = 0.4;
+      z.ages[idx] = 0;
+      z.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function updateZs(dt) {
+      const z = state.zSystem;
+      for (let i = 0; i < z.max; i++) {
+        if (z.ages[i] >= 0) {
+          z.ages[i] += dt;
+          z.positions[i * 3] += dt * 0.15;
+          z.positions[i * 3 + 1] += dt * 0.65;
+          z.positions[i * 3 + 2] -= dt * 0.05;
+          if (z.ages[i] > 2.6) {
+            z.positions[i * 3] = 9999;
+            z.ages[i] = -1;
+          }
+        }
+      }
+      z.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // ============== 胡萝卜碎片粒子 ==============
+    function createCrumbSystem() {
+      const max = 30;
+      const positions = new Float32Array(max * 3);
+      const velocities = new Float32Array(max * 3);
+      const lifetimes = new Float32Array(max);
+      for (let i = 0; i < max; i++) {
+        positions[i * 3] = 9999;
+        positions[i * 3 + 1] = 9999;
+        positions[i * 3 + 2] = 9999;
+        lifetimes[i] = 0;
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const tex = createParticleTexture('rgba(255, 120, 20, 1)');
+      const mat = new THREE.PointsMaterial({
+        map: tex, size: 0.08, sizeAttenuation: true,
+        transparent: true, opacity: 0.95,
+        depthWrite: false, color: 0xff7b22
+      });
+      const points = new THREE.Points(geo, mat);
+      points.frustumCulled = false;
+      return { points, positions, velocities, lifetimes, max, next: 0 };
+    }
+
+    function spawnCrumbs(pos) {
+      const c = state.crumbSystem;
+      for (let i = 0; i < 4; i++) {
+        const idx = c.next;
+        c.next = (c.next + 1) % c.max;
+        c.positions[idx * 3] = pos.x + (Math.random() - 0.5) * 0.1;
+        c.positions[idx * 3 + 1] = pos.y + (Math.random() - 0.5) * 0.1;
+        c.positions[idx * 3 + 2] = pos.z + (Math.random() - 0.5) * 0.1;
+        c.velocities[idx * 3] = (Math.random() - 0.5) * 0.8;
+        c.velocities[idx * 3 + 1] = Math.random() * 0.5 + 0.1;
+        c.velocities[idx * 3 + 2] = Math.random() * 0.8 + 0.2;
+        c.lifetimes[idx] = 0.5 + Math.random() * 0.4;
+      }
+      c.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function updateCrumbs(dt) {
+      const c = state.crumbSystem;
+      for (let i = 0; i < c.max; i++) {
+        if (c.lifetimes[i] > 0) {
+          c.lifetimes[i] -= dt;
+          c.positions[i * 3] += c.velocities[i * 3] * dt;
+          c.positions[i * 3 + 1] += c.velocities[i * 3 + 1] * dt;
+          c.positions[i * 3 + 2] += c.velocities[i * 3 + 2] * dt;
+          c.velocities[i * 3 + 1] -= 2.5 * dt;
+          if (c.lifetimes[i] <= 0 || c.positions[i * 3 + 1] < 0) {
+            c.positions[i * 3] = 9999;
+            c.positions[i * 3 + 1] = 9999;
+            c.positions[i * 3 + 2] = 9999;
+          }
+        }
+      }
+      c.points.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // ============== 兔子毛色斑纹贴图生成器 (Procedural Fur Coat Generator) ==============
+    function createCoatTexture(type, bodyHex, patternHex, patternType) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext('2d');
+
+      const bodyColor = new THREE.Color(bodyHex).getStyle();
+      const patternColor = new THREE.Color(patternHex).getStyle();
+
+      // 绘制自然毛发边缘的有机斑点 (Organic fur spot blob)
+      function drawBlob(x, y, r, color, seed = 0) {
+        ctx.save();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        const points = 16;
+        for (let i = 0; i < points; i++) {
+          const theta = (i / points) * Math.PI * 2;
+          const noise = 0.85 + Math.sin(theta * 3 + seed) * 0.10 + Math.cos(theta * 2 + seed * 1.7) * 0.06;
+          const px = x + Math.cos(theta) * r * noise;
+          const py = y + Math.sin(theta) * r * noise;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 1. 底色全幅铺底
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      if (type === 'body') {
+        if (patternType === 'dutch') {
+          // 经典道奇兔：身体前肩部与胸背纯白毛毯鞍带 (Dutch white saddle band)
+          ctx.fillStyle = patternColor;
+          ctx.beginPath();
+          ctx.moveTo(0, 240);
+          ctx.bezierCurveTo(256, 210, 512, 220, 768, 210);
+          ctx.bezierCurveTo(896, 210, 1024, 240, 1024, 240);
+          ctx.lineTo(1024, 660);
+          ctx.bezierCurveTo(768, 690, 512, 680, 256, 690);
+          ctx.bezierCurveTo(128, 690, 0, 660, 0, 660);
+          ctx.closePath();
+          ctx.fill();
+        } else if (patternType === 'spotted') {
+          // 斑点兔 (Dalmatian / Broken coat)：自然有机斑点群贴合毛发
+          const spots = [
+            // 左侧身体与后臀 (u ~ 0.40 - 0.65)
+            [480, 520, 78, 5],
+            [590, 430, 56, 12],
+            [430, 680, 68, 23],
+            [550, 740, 50, 41],
+            [650, 610, 62, 17],
+            [380, 480, 46, 33],
+            // 右侧身体与后臀 (u ~ 0.85 - 1.0 & 0 - 0.15)
+            [80, 490, 72, 8],
+            [160, 420, 52, 19],
+            [90, 710, 64, 27],
+            [960, 500, 70, 31],
+            [880, 450, 54, 45],
+            [920, 700, 65, 53],
+            [830, 620, 48, 61],
+            // 脊背纵线斑点 (u ~ 0.75)
+            [768, 310, 42, 71],
+            [768, 460, 58, 83],
+            [768, 610, 50, 97],
+            [730, 750, 40, 105],
+            [800, 770, 38, 113],
+            // 前肩小点缀 (u ~ 0.25)
+            [220, 420, 36, 121],
+            [290, 450, 38, 137]
+          ];
+          spots.forEach(([sx, sy, sr, seed]) => {
+            drawBlob(sx, sy, sr, patternColor, seed);
+          });
+        } else if (patternType === 'patch') {
+          // 局部大色块 (Patch / Broken)
+          drawBlob(540, 580, 140, patternColor, 15);
+          drawBlob(100, 490, 115, patternColor, 28);
+          drawBlob(820, 410, 95, patternColor, 44);
+        } else if (patternType === 'harlequin') {
+          // 小丑兔 (Harlequin)：对称对角双色交替格纹
+          ctx.fillStyle = patternColor;
+          ctx.fillRect(0, 0, 512, 512);
+          ctx.fillRect(512, 512, 512, 512);
+        }
+      } else if (type === 'head') {
+        if (patternType === 'dutch') {
+          // 经典道奇兔：从额头中线向口鼻部开叉的倒V白花面 (Dutch blaze)
+          ctx.fillStyle = patternColor;
+          ctx.beginPath();
+          ctx.moveTo(256, 110);
+          ctx.bezierCurveTo(275, 260, 335, 480, 380, 760);
+          ctx.lineTo(132, 760);
+          ctx.bezierCurveTo(177, 480, 237, 260, 256, 110);
+          ctx.closePath();
+          ctx.fill();
+
+          // 口鼻下巴纯白环带
+          ctx.beginPath();
+          ctx.arc(256, 760, 190, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (patternType === 'spotted') {
+          // 斑点兔头部：鼻翼蝴蝶斑、眼周与脸颊小雀斑
+          drawBlob(256, 610, 44, patternColor, 7); // 鼻梁蝴蝶斑
+          drawBlob(345, 470, 38, patternColor, 18); // 左眼侧小斑
+          drawBlob(165, 500, 32, patternColor, 29); // 右脸颊斑点
+          drawBlob(375, 580, 26, patternColor, 34); // 左腮小雀斑
+          drawBlob(256, 310, 30, patternColor, 42); // 额头小花
+        } else if (patternType === 'patch') {
+          // 海盗单眼眼罩色斑 (Eye patch covering left eye)
+          drawBlob(345, 470, 105, patternColor, 9);
+        } else if (patternType === 'harlequin') {
+          // 阴阳脸半半色 (Split face chimera: left half pattern color, right half body color)
+          ctx.fillStyle = patternColor;
+          ctx.fillRect(256, 0, 512, 1024);
+        }
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.ClampToEdgeWrapping;
+      return texture;
+    }
+
+    // ============== 升级版 3D 兔子模型类 ==============
+    class MasterpieceRabbit {
+      constructor() {
+        this.group = new THREE.Group();
+        this.parts = {};
+        this.materials = {};
+        this.textures = {};
+        this.colors = {
+          body: state.current.body,
+          inner: state.current.inner,
+          eyes: state.current.eyes,
+          nose: state.current.nose,
+          pattern: state.current.pattern
+        };
+        this.pattern = 'solid';
+        this.earStyle = 'upright';
+        this.accessory = 'none';
+        this.state = 'idle';
+        this.stateTime = 0;
+        
+        this.earSpring = { leftZ: 0, rightZ: 0, leftX: 0, rightX: 0, velLZ: 0, velRZ: 0 };
+        this.headTrack = { x: 0, y: 0 };
+        this.blinkTimer = 2.5;
+        this.blinking = 0;
+        this.sniffTimer = 0;
+
+        this.buildMaterials();
+        this.buildGeometry();
+        this.updateCoatTextures();
+        this.setEarStyle('upright');
+        this.setAccessory('none');
+      }
+
+      buildMaterials() {
+        const createFurMaterial = (color = 0xffffff) => {
+          return new THREE.MeshStandardMaterial({
+            color: color,
+            roughness: 0.92,
+            metalness: 0.04
+          });
+        };
+
+        this.materials.body = createFurMaterial();
+        this.materials.head = createFurMaterial();
+        this.materials.tail = createFurMaterial(this.colors.body);
+        this.materials.frontLimbs = createFurMaterial(this.colors.body);
+        this.materials.backLimbs = createFurMaterial(this.colors.body);
+        this.materials.outerEarLeft = createFurMaterial(this.colors.body);
+        this.materials.outerEarRight = createFurMaterial(this.colors.body);
+
+        this.materials.white = createFurMaterial(0xfcfcfc);
+        this.materials.inner = new THREE.MeshStandardMaterial({
+          color: this.colors.inner,
+          roughness: 0.72,
+          metalness: 0.0
+        });
+        
+        this.materials.iris = new THREE.MeshStandardMaterial({
+          color: this.colors.eyes,
+          roughness: 0.15,
+          metalness: 0.35
+        });
+        this.materials.pupil = new THREE.MeshBasicMaterial({ color: 0x050505 });
+        this.materials.sclera = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+        this.materials.eyeGleam = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        
+        this.materials.nose = new THREE.MeshStandardMaterial({
+          color: this.colors.nose,
+          roughness: 0.45,
+          metalness: 0.05
+        });
+        this.materials.teeth = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+
+        this.materials.whisker = new THREE.LineBasicMaterial({
+          color: 0x423024,
+          transparent: true,
+          opacity: 0.75,
+          linewidth: 2
+        });
+
+        this.materials.gold = new THREE.MeshStandardMaterial({
+          color: 0xf5b338,
+          roughness: 0.25,
+          metalness: 0.85
+        });
+        this.materials.ribbon = new THREE.MeshStandardMaterial({
+          color: 0xd9383a,
+          roughness: 0.6,
+          metalness: 0.1
+        });
+        this.materials.collar = new THREE.MeshStandardMaterial({
+          color: 0x2b425b,
+          roughness: 0.5
+        });
+        this.materials.carrotOrange = new THREE.MeshStandardMaterial({
+          color: 0xff6600,
+          roughness: 0.65
+        });
+        this.materials.carrotGreen = new THREE.MeshStandardMaterial({
+          color: 0x48a038,
+          roughness: 0.75
+        });
+      }
+
+      updateCoatTextures(previewPart = null, previewColor = null) {
+        const bodyColor = (previewPart === 'body' && previewColor) ? previewColor : this.colors.body;
+        const patternColor = (previewPart === 'pattern' && previewColor) ? previewColor : this.colors.pattern;
+        const innerColor = (previewPart === 'inner' && previewColor) ? previewColor : this.colors.inner;
+        const eyesColor = (previewPart === 'eyes' && previewColor) ? previewColor : this.colors.eyes;
+        const noseColor = (previewPart === 'nose' && previewColor) ? previewColor : this.colors.nose;
+
+        if (this.textures.body) this.textures.body.dispose();
+        if (this.textures.head) this.textures.head.dispose();
+
+        this.textures.body = createCoatTexture('body', bodyColor, patternColor, this.pattern);
+        this.textures.head = createCoatTexture('head', bodyColor, patternColor, this.pattern);
+
+        this.materials.body.map = this.textures.body;
+        this.materials.body.color.set(0xffffff);
+        this.materials.body.needsUpdate = true;
+
+        this.materials.head.map = this.textures.head;
+        this.materials.head.color.set(0xffffff);
+        this.materials.head.needsUpdate = true;
+
+        this.materials.inner.color.set(innerColor);
+        this.materials.iris.color.set(eyesColor);
+        this.materials.nose.color.set(noseColor);
+
+        // 斑纹搭配四肢与尾巴毛色
+        if (this.pattern === 'socks') {
+          this.materials.frontLimbs.color.set(patternColor);
+          this.materials.backLimbs.color.set(patternColor);
+        } else if (this.pattern === 'dutch') {
+          this.materials.frontLimbs.color.set(0xfcfcfc);
+          this.materials.backLimbs.color.set(bodyColor);
+        } else {
+          this.materials.frontLimbs.color.set(bodyColor);
+          this.materials.backLimbs.color.set(bodyColor);
+        }
+
+        if (this.pattern === 'dutch') {
+          this.materials.tail.color.set(0xfcfcfc);
+        } else {
+          this.materials.tail.color.set(bodyColor);
+        }
+
+        if (this.pattern === 'harlequin') {
+          this.materials.outerEarLeft.color.set(patternColor);
+          this.materials.outerEarRight.color.set(bodyColor);
+        } else {
+          this.materials.outerEarLeft.color.set(bodyColor);
+          this.materials.outerEarRight.color.set(bodyColor);
+        }
+      }
+
+      buildGeometry() {
+        // 1. 身体
+        const bodyGeo = new THREE.SphereGeometry(0.70, 40, 40);
+        const pos = bodyGeo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          let y = pos.getY(i);
+          let x = pos.getX(i);
+          let z = pos.getZ(i);
+          let factor = 1.0 - (y * 0.12);
+          pos.setX(i, x * factor * 0.88);
+          pos.setZ(i, z * factor * 0.98);
+          pos.setY(i, y * 1.15);
+        }
+        bodyGeo.computeVertexNormals();
+        this.parts.body = new THREE.Mesh(bodyGeo, this.materials.body);
+        this.parts.body.position.set(0, 0.95, 0);
+        this.parts.body.castShadow = true;
+        this.parts.body.receiveShadow = true;
+        this.group.add(this.parts.body);
+
+        // 2. 胸前与肚皮软绒毛
+        const bibGeo = new THREE.SphereGeometry(0.46, 32, 32);
+        bibGeo.scale(0.75, 0.95, 0.32);
+        this.parts.chest = new THREE.Mesh(bibGeo, this.materials.inner);
+        this.parts.chest.position.set(0, 0.84, 0.46);
+        this.parts.chest.rotation.x = 0.22;
+        this.parts.chest.castShadow = true;
+        this.group.add(this.parts.chest);
+
+        // 3. 头部基座组
+        this.parts.headGroup = new THREE.Group();
+        this.parts.headGroup.position.set(0, 1.70, 0.18);
+        this.group.add(this.parts.headGroup);
+
+        // 4. 头部主模型
+        const headGeo = new THREE.SphereGeometry(0.48, 40, 40);
+        const hPos = headGeo.attributes.position;
+        for (let i = 0; i < hPos.count; i++) {
+          let y = hPos.getY(i);
+          let x = hPos.getX(i);
+          let z = hPos.getZ(i);
+          if (y < 0) {
+            hPos.setX(i, x * 1.06);
+            hPos.setZ(i, z * 1.04);
+          } else {
+            hPos.setX(i, x * 0.96);
+          }
+        }
+        headGeo.computeVertexNormals();
+        this.parts.head = new THREE.Mesh(headGeo, this.materials.head);
+        this.parts.head.castShadow = true;
+        this.parts.headGroup.add(this.parts.head);
+
+        // 5. 脸颊软包
+        const cheekGeo = new THREE.SphereGeometry(0.17, 24, 24);
+        cheekGeo.scale(0.9, 0.75, 0.8);
+        this.parts.leftCheek = new THREE.Mesh(cheekGeo, this.materials.head);
+        this.parts.leftCheek.position.set(-0.26, -0.08, 0.22);
+        this.parts.headGroup.add(this.parts.leftCheek);
+        this.parts.rightCheek = new THREE.Mesh(cheekGeo.clone(), this.materials.head);
+        this.parts.rightCheek.position.set(0.26, -0.08, 0.22);
+        this.parts.headGroup.add(this.parts.rightCheek);
+
+        // 6. 口鼻部
+        const muzzleGeo = new THREE.SphereGeometry(0.13, 24, 24);
+        muzzleGeo.scale(0.9, 0.75, 0.8);
+        this.parts.leftMuzzle = new THREE.Mesh(muzzleGeo, this.materials.inner);
+        this.parts.leftMuzzle.position.set(-0.08, -0.12, 0.40);
+        this.parts.headGroup.add(this.parts.leftMuzzle);
+        this.parts.rightMuzzle = new THREE.Mesh(muzzleGeo.clone(), this.materials.inner);
+        this.parts.rightMuzzle.position.set(0.08, -0.12, 0.40);
+        this.parts.headGroup.add(this.parts.rightMuzzle);
+
+        // 小兔门牙
+        const toothGeo = new THREE.BoxGeometry(0.038, 0.045, 0.025);
+        this.parts.teeth = new THREE.Mesh(toothGeo, this.materials.teeth);
+        this.parts.teeth.position.set(0, -0.18, 0.44);
+        this.parts.teeth.rotation.x = 0.1;
+        this.parts.headGroup.add(this.parts.teeth);
+
+        // 鼻子
+        const noseGeo = new THREE.SphereGeometry(0.055, 20, 20);
+        noseGeo.scale(1.15, 0.85, 0.65);
+        this.parts.nose = new THREE.Mesh(noseGeo, this.materials.nose);
+        this.parts.nose.position.set(0, -0.05, 0.50);
+        this.parts.headGroup.add(this.parts.nose);
+
+        this.buildEyes();
+
+        // 8. 眉毛
+        const browGeo = new THREE.SphereGeometry(0.05, 12, 12);
+        browGeo.scale(1.1, 0.5, 0.5);
+        this.parts.leftBrow = new THREE.Mesh(browGeo, this.materials.inner);
+        this.parts.leftBrow.position.set(-0.20, 0.24, 0.36);
+        this.parts.leftBrow.rotation.z = -0.2;
+        this.parts.headGroup.add(this.parts.leftBrow);
+        this.parts.rightBrow = new THREE.Mesh(browGeo.clone(), this.materials.inner);
+        this.parts.rightBrow.position.set(0.20, 0.24, 0.36);
+        this.parts.rightBrow.rotation.z = 0.2;
+        this.parts.headGroup.add(this.parts.rightBrow);
+
+        this.buildEars();
+        this.buildWhiskers();
+        this.buildLimbs();
+        this.buildFluffyTail();
+
+        this.parts.patternGroup = new THREE.Group();
+        this.group.add(this.parts.patternGroup);
+        this.parts.headPatternGroup = new THREE.Group();
+        this.parts.headGroup.add(this.parts.headPatternGroup);
+
+        this.parts.accessoryGroup = new THREE.Group();
+        this.group.add(this.parts.accessoryGroup);
+        this.parts.headAccessoryGroup = new THREE.Group();
+        this.parts.headGroup.add(this.parts.headAccessoryGroup);
+      }
+
+      buildEyes() {
+        this.parts.eyes = [];
+        [-1, 1].forEach((side) => {
+          const eyeGroup = new THREE.Group();
+          eyeGroup.position.set(side * 0.21, 0.08, 0.38);
+          eyeGroup.rotation.y = side * 0.30;
+
+          const scleraGeo = new THREE.SphereGeometry(0.10, 24, 24);
+          scleraGeo.scale(0.8, 1.0, 0.7);
+          const sclera = new THREE.Mesh(scleraGeo, this.materials.sclera);
+          eyeGroup.add(sclera);
+
+          const irisGeo = new THREE.SphereGeometry(0.085, 24, 24);
+          irisGeo.scale(0.7, 0.9, 0.2);
+          const iris = new THREE.Mesh(irisGeo, this.materials.iris);
+          iris.position.z = 0.05;
+          eyeGroup.add(iris);
+
+          const pupilGeo = new THREE.SphereGeometry(0.055, 20, 20);
+          pupilGeo.scale(0.65, 0.8, 0.15);
+          const pupil = new THREE.Mesh(pupilGeo, this.materials.pupil);
+          pupil.position.z = 0.062;
+          eyeGroup.add(pupil);
+
+          const hl1Geo = new THREE.SphereGeometry(0.03, 12, 12);
+          const hl1 = new THREE.Mesh(hl1Geo, this.materials.eyeGleam);
+          hl1.position.set(-side * 0.02, 0.03, 0.072);
+          eyeGroup.add(hl1);
+
+          const hl2Geo = new THREE.SphereGeometry(0.015, 10, 10);
+          const hl2 = new THREE.Mesh(hl2Geo, this.materials.eyeGleam);
+          hl2.position.set(side * 0.025, -0.025, 0.07);
+          eyeGroup.add(hl2);
+
+          this.parts.headGroup.add(eyeGroup);
+          this.parts.eyes.push(eyeGroup);
+        });
+      }
+
+      buildEars() {
+        const createEarMesh = (isInner = false) => {
+          const earCurve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3(0, 0.35, 0.02),
+            new THREE.Vector3(0, 0.75, 0.01),
+            new THREE.Vector3(0, 1.0, -0.05)
+          ]);
+          const geo = new THREE.TubeGeometry(earCurve, 20, isInner ? 0.075 : 0.13, 16, false);
+          const p = geo.attributes.position;
+          for (let i = 0; i < p.count; i++) {
+            let z = p.getZ(i);
+            let x = p.getX(i);
+            let y = p.getY(i);
+            let taper = Math.sin((y / 1.0) * Math.PI) * 1.15 + 0.3;
+            if (isInner) {
+              p.setX(i, x * taper * 1.25);
+              p.setZ(i, z * 0.4 + 0.035);
+            } else {
+              p.setX(i, x * taper * 1.45);
+              p.setZ(i, z * 0.7);
+            }
+          }
+          geo.computeVertexNormals();
+          return geo;
+        };
+
+        const leftEarGeo = createEarMesh(false);
+        const leftInnerGeo = createEarMesh(true);
+
+        this.parts.leftEar = new THREE.Group();
+        const leftOuter = new THREE.Mesh(leftEarGeo, this.materials.outerEarLeft);
+        leftOuter.castShadow = true;
+        this.parts.leftEar.add(leftOuter);
+        const leftInner = new THREE.Mesh(leftInnerGeo, this.materials.inner);
+        this.parts.leftEar.add(leftInner);
+        this.parts.leftEar.position.set(-0.20, 0.46, -0.03);
+        this.parts.headGroup.add(this.parts.leftEar);
+
+        this.parts.rightEar = new THREE.Group();
+        const rightOuter = new THREE.Mesh(leftEarGeo.clone(), this.materials.outerEarRight);
+        rightOuter.castShadow = true;
+        this.parts.rightEar.add(rightOuter);
+        const rightInner = new THREE.Mesh(leftInnerGeo.clone(), this.materials.inner);
+        this.parts.rightEar.add(rightInner);
+        this.parts.rightEar.position.set(0.20, 0.46, -0.03);
+        this.parts.headGroup.add(this.parts.rightEar);
+      }
+
+      buildWhiskers() {
+        this.parts.whiskers = [];
+        [-1, 1].forEach((side) => {
+          for (let i = 0; i < 3; i++) {
+            const spread = (i - 1) * 0.08;
+            const curve = new THREE.QuadraticBezierCurve3(
+              new THREE.Vector3(side * 0.14, -0.10 + spread * 0.5, 0.42),
+              new THREE.Vector3(side * 0.38, -0.12 + spread * 1.2, 0.36),
+              new THREE.Vector3(side * 0.65, -0.18 + spread * 2.2, 0.26)
+            );
+            const pts = curve.getPoints(12);
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const line = new THREE.Line(geo, this.materials.whisker);
+            this.parts.headGroup.add(line);
+            this.parts.whiskers.push(line);
+          }
+        });
+      }
+
+      buildLimbs() {
+        const armGeo = new THREE.CapsuleGeometry(0.09, 0.30, 12, 16);
+        armGeo.scale(0.95, 1.0, 1.15);
+        
+        const padGeo = new THREE.SphereGeometry(0.038, 12, 12);
+        padGeo.scale(1.1, 0.6, 1.3);
+
+        this.parts.frontLeftFoot = new THREE.Group();
+        const flMesh = new THREE.Mesh(armGeo, this.materials.frontLimbs);
+        flMesh.castShadow = true;
+        this.parts.frontLeftFoot.add(flMesh);
+        const flPad = new THREE.Mesh(padGeo, this.materials.inner);
+        flPad.position.set(0, -0.15, 0.05);
+        this.parts.frontLeftFoot.add(flPad);
+        this.parts.frontLeftFoot.position.set(-0.24, 0.25, 0.42);
+        this.parts.frontLeftFoot.rotation.x = -0.32;
+        this.group.add(this.parts.frontLeftFoot);
+
+        this.parts.frontRightFoot = new THREE.Group();
+        const frMesh = new THREE.Mesh(armGeo.clone(), this.materials.frontLimbs);
+        frMesh.castShadow = true;
+        this.parts.frontRightFoot.add(frMesh);
+        const frPad = new THREE.Mesh(padGeo.clone(), this.materials.inner);
+        frPad.position.set(0, -0.15, 0.05);
+        this.parts.frontRightFoot.add(frPad);
+        this.parts.frontRightFoot.position.set(0.24, 0.25, 0.42);
+        this.parts.frontRightFoot.rotation.x = -0.32;
+        this.group.add(this.parts.frontRightFoot);
+
+        const thighGeo = new THREE.SphereGeometry(0.25, 24, 24);
+        thighGeo.scale(0.72, 1.1, 1.1);
+        const backPawGeo = new THREE.BoxGeometry(0.18, 0.13, 0.46);
+        
+        this.parts.backLeftFoot = new THREE.Group();
+        const blThigh = new THREE.Mesh(thighGeo, this.materials.backLimbs);
+        blThigh.position.set(0, 0.26, -0.08);
+        blThigh.castShadow = true;
+        this.parts.backLeftFoot.add(blThigh);
+        const blPaw = new THREE.Mesh(backPawGeo, this.materials.backLimbs);
+        blPaw.position.set(0, 0.07, 0.10);
+        blPaw.castShadow = true;
+        this.parts.backLeftFoot.add(blPaw);
+        this.parts.backLeftFoot.position.set(-0.36, 0.10, -0.16);
+        this.parts.backLeftFoot.rotation.y = 0.12;
+        this.group.add(this.parts.backLeftFoot);
+
+        this.parts.backRightFoot = new THREE.Group();
+        const brThigh = new THREE.Mesh(thighGeo.clone(), this.materials.backLimbs);
+        brThigh.position.set(0, 0.26, -0.08);
+        brThigh.castShadow = true;
+        this.parts.backRightFoot.add(brThigh);
+        const brPaw = new THREE.Mesh(backPawGeo.clone(), this.materials.backLimbs);
+        brPaw.position.set(0, 0.07, 0.10);
+        brPaw.castShadow = true;
+        this.parts.backRightFoot.add(brPaw);
+        this.parts.backRightFoot.position.set(0.36, 0.10, -0.16);
+        this.parts.backRightFoot.rotation.y = -0.12;
+        this.group.add(this.parts.backRightFoot);
+      }
+
+      buildFluffyTail() {
+        this.parts.tail = new THREE.Group();
+        this.parts.tail.position.set(0, 0.78, -0.62);
+        
+        // 中心饱满球
+        const centerBallGeo = new THREE.SphereGeometry(0.19, 24, 24);
+        centerBallGeo.scale(1.05, 1.1, 1.05);
+        const centerBall = new THREE.Mesh(centerBallGeo, this.materials.tail);
+        centerBall.castShadow = true;
+        this.parts.tail.add(centerBall);
+
+        // 16个多层有机凸起的超蓬松棉花绒球簇 (Ultra-Fluffy Cotton-Ball Tail)
+        const puffs = [
+          [0, 0.13, -0.04, 0.12],
+          [-0.09, 0.10, 0.02, 0.11],
+          [0.09, 0.10, 0.02, 0.11],
+          [-0.13, 0.03, 0.06, 0.115],
+          [0.13, 0.03, 0.06, 0.115],
+          [-0.12, 0.02, -0.07, 0.11],
+          [0.12, 0.02, -0.07, 0.11],
+          [0, 0.04, -0.14, 0.13],
+          [0, 0.05, 0.09, 0.105],
+          [-0.08, -0.08, 0.03, 0.11],
+          [0.08, -0.08, 0.03, 0.11],
+          [0, -0.11, -0.05, 0.12],
+          [-0.07, -0.07, -0.09, 0.10],
+          [0.07, -0.07, -0.09, 0.10],
+          [-0.15, -0.02, -0.01, 0.09],
+          [0.15, -0.02, -0.01, 0.09]
+        ];
+
+        puffs.forEach(([px, py, pz, pr]) => {
+          const puffGeo = new THREE.SphereGeometry(pr, 16, 16);
+          const puff = new THREE.Mesh(puffGeo, this.materials.tail);
+          puff.position.set(px, py, pz);
+          puff.castShadow = true;
+          this.parts.tail.add(puff);
+        });
+
+        this.group.add(this.parts.tail);
+      }
+
+      setEarStyle(style) {
+        this.earStyle = style;
+        if (style === 'upright') {
+          this.baseEarLeft = { x: -0.05, y: 0.0, z: 0.16 };
+          this.baseEarRight = { x: -0.05, y: 0.0, z: -0.16 };
+        } else if (style === 'lop') {
+          this.baseEarLeft = { x: 0.15, y: 0.1, z: 1.50 };
+          this.baseEarRight = { x: 0.15, y: -0.1, z: -1.50 };
+        } else if (style === 'tilt') {
+          this.baseEarLeft = { x: -0.15, y: 0.1, z: 0.42 };
+          this.baseEarRight = { x: 0.25, y: -0.1, z: -1.22 };
+        }
+        this.parts.leftEar.rotation.set(this.baseEarLeft.x, this.baseEarLeft.y, this.baseEarLeft.z);
+        this.parts.rightEar.rotation.set(this.baseEarRight.x, this.baseEarRight.y, this.baseEarRight.z);
+      }
+
+      setAccessory(acc) {
+        this.accessory = acc;
+        while (this.parts.accessoryGroup.children.length) {
+          const c = this.parts.accessoryGroup.children[0];
+          this.parts.accessoryGroup.remove(c);
+          if (c.geometry) c.geometry.dispose();
+        }
+        while (this.parts.headAccessoryGroup.children.length) {
+          const c = this.parts.headAccessoryGroup.children[0];
+          this.parts.headAccessoryGroup.remove(c);
+          if (c.geometry) c.geometry.dispose();
+        }
+
+        if (acc === 'bow') {
+          const bowNode = new THREE.Group();
+          bowNode.position.set(0, 1.34, 0.56);
+          
+          const knotGeo = new THREE.SphereGeometry(0.05, 16, 16);
+          const knot = new THREE.Mesh(knotGeo, this.materials.ribbon);
+          bowNode.add(knot);
+
+          const wingGeo = new THREE.ConeGeometry(0.10, 0.22, 16);
+          wingGeo.rotateZ(Math.PI / 2);
+          const leftWing = new THREE.Mesh(wingGeo, this.materials.ribbon);
+          leftWing.position.set(-0.11, 0, 0);
+          bowNode.add(leftWing);
+
+          const rightWing = new THREE.Mesh(wingGeo.clone(), this.materials.ribbon);
+          rightWing.rotateZ(Math.PI);
+          rightWing.position.set(0.11, 0, 0);
+          bowNode.add(rightWing);
+
+          this.parts.accessoryGroup.add(bowNode);
+        } else if (acc === 'bell') {
+          const collarNode = new THREE.Group();
+          collarNode.position.set(0, 1.40, 0.18);
+
+          const torusGeo = new THREE.TorusGeometry(0.40, 0.035, 12, 32);
+          torusGeo.rotateX(Math.PI / 2 + 0.15);
+          const collar = new THREE.Mesh(torusGeo, this.materials.collar);
+          collarNode.add(collar);
+
+          const bellGeo = new THREE.SphereGeometry(0.065, 20, 20);
+          const bell = new THREE.Mesh(bellGeo, this.materials.gold);
+          bell.position.set(0, -0.04, 0.44);
+          bell.castShadow = true;
+          collarNode.add(bell);
+
+          this.parts.accessoryGroup.add(collarNode);
+        } else if (acc === 'crown') {
+          const crownNode = new THREE.Group();
+          crownNode.position.set(0, 0.42, 0.04);
+
+          const ringGeo = new THREE.TorusGeometry(0.28, 0.02, 8, 24);
+          ringGeo.rotateX(Math.PI / 2);
+          const vine = new THREE.Mesh(ringGeo, this.materials.carrotGreen);
+          crownNode.add(vine);
+
+          const flowerColors = [0xff8293, 0xffd154, 0xffffff, 0xb892ff, 0xff9db6];
+          for (let i = 0; i < 7; i++) {
+            const angle = (i / 7) * Math.PI * 2;
+            const flower = new THREE.Mesh(
+              new THREE.SphereGeometry(0.045, 12, 12),
+              new THREE.MeshStandardMaterial({ color: flowerColors[i % flowerColors.length], roughness: 0.5 })
+            );
+            flower.position.set(Math.cos(angle) * 0.28, 0.03, Math.sin(angle) * 0.28);
+            crownNode.add(flower);
+          }
+          this.parts.headAccessoryGroup.add(crownNode);
+        } else if (acc === 'carrot') {
+          const carrotNode = new THREE.Group();
+          carrotNode.position.set(0, 0.60, 0.68);
+          carrotNode.rotation.set(0.6, 0, 0.4);
+
+          const coneGeo = new THREE.ConeGeometry(0.09, 0.48, 20);
+          coneGeo.rotateX(Math.PI);
+          const carrotBody = new THREE.Mesh(coneGeo, this.materials.carrotOrange);
+          carrotBody.castShadow = true;
+          carrotNode.add(carrotBody);
+
+          for (let i = 0; i < 3; i++) {
+            const leafGeo = new THREE.CylinderGeometry(0.008, 0.02, 0.22, 8);
+            const leaf = new THREE.Mesh(leafGeo, this.materials.carrotGreen);
+            leaf.position.set((i - 1) * 0.03, 0.30, 0);
+            leaf.rotation.z = (i - 1) * 0.35;
+            carrotNode.add(leaf);
+          }
+          this.parts.carrotObj = carrotNode;
+          this.parts.accessoryGroup.add(carrotNode);
+        }
+      }
+
+      applyColors() {
+        this.updateCoatTextures();
+      }
+
+      setColor(part, color) {
+        this.colors[part] = color;
+        this.updateCoatTextures();
+      }
+
+      previewColor(part, color) {
+        if (part === 'body' || part === 'pattern') {
+          this.updateCoatTextures(part, color);
+        } else if (part === 'inner') {
+          this.materials.inner.color.set(color);
+        } else if (part === 'eyes') {
+          this.materials.iris.color.set(color);
+        } else if (part === 'nose') {
+          this.materials.nose.color.set(color);
+        }
+      }
+
+      clearPreview() {
+        this.updateCoatTextures();
+      }
+
+      setPattern(pattern) {
+        this.pattern = pattern;
+        this.updateCoatTextures();
+      }
+
+      rebuildPattern() {
+        while (this.parts.patternGroup.children.length) {
+          const c = this.parts.patternGroup.children[0];
+          this.parts.patternGroup.remove(c);
+          if (c.geometry) c.geometry.dispose();
+        }
+        while (this.parts.headPatternGroup.children.length) {
+          const c = this.parts.headPatternGroup.children[0];
+          this.parts.headPatternGroup.remove(c);
+          if (c.geometry) c.geometry.dispose();
+        }
+      }
+
+      setState(action) {
+        if (this.state === action) return;
+        this.state = action;
+        this.stateTime = 0;
+        this.blinkTimer = 2.5;
+      }
+
+      update(dt) {
+        this.stateTime += dt;
+        const t = this.stateTime;
+
+        this.group.position.set(0, 0, 0);
+        this.group.scale.set(1, 1, 1);
+        this.group.rotation.set(0, 0, 0);
+        this.parts.headGroup.rotation.set(0, 0, 0);
+        this.parts.headGroup.position.set(0, 1.70, 0.18);
+        
+        this.parts.eyes.forEach(e => e.scale.set(1, 1, 1));
+        this.parts.nose.scale.set(1.15, 0.85, 0.65);
+
+        this.earSpring.velLZ += (-this.earSpring.leftZ * 18 - this.earSpring.velLZ * 4.5) * dt;
+        this.earSpring.leftZ += this.earSpring.velLZ * dt;
+        this.earSpring.velRZ += (-this.earSpring.rightZ * 18 - this.earSpring.velRZ * 4.5) * dt;
+        this.earSpring.rightZ += this.earSpring.velRZ * dt;
+
+        let curBaseLZ = this.baseEarLeft.z + this.earSpring.leftZ;
+        let curBaseRZ = this.baseEarRight.z + this.earSpring.rightZ;
+
+        switch (this.state) {
+          case 'idle': {
+            // 自然角度限制的智能头部转动 (Natural Clamped Head Tracking)
+            // 兔子的水平视界限制在前方 ~85° 范围内，最大转头角度严格限制在 ±22° (0.38 rad)
+            const camAngleY = Math.atan2(state.camera.position.x, state.camera.position.z);
+            const maxFov = Math.PI * 0.47;
+            let targetHeadY = 0;
+            if (Math.abs(camAngleY) < maxFov) {
+              const ratio = camAngleY / maxFov;
+              targetHeadY = Math.sin(ratio * Math.PI * 0.5) * 0.38;
+            } else {
+              // 当摄像机绕到兔子身后时，兔子自然优雅地看向正前方，绝不向后怪异拧脖子
+              targetHeadY = 0;
+            }
+
+            // 垂直俯仰微动 (上下视线轻微跟随摄像机，限制在 ±14° 内)
+            const camDist = Math.hypot(state.camera.position.x, state.camera.position.z);
+            const camAngleX = Math.atan2(state.camera.position.y - 1.70, camDist);
+            const targetHeadX = Math.max(-0.24, Math.min(0.24, camAngleX * 0.45));
+
+            this.headTrack.y += (targetHeadY - this.headTrack.y) * Math.min(dt * 4.0, 1);
+            this.headTrack.x += (targetHeadX - this.headTrack.x) * Math.min(dt * 4.0, 1);
+            
+            this.parts.headGroup.rotation.y = this.headTrack.y + Math.sin(t * 0.8) * 0.03;
+            this.parts.headGroup.rotation.x = this.headTrack.x + Math.sin(t * 1.6) * 0.025;
+            
+            this.group.position.y = Math.sin(t * 2.0) * 0.025;
+            this.parts.body.scale.set(1 + Math.sin(t * 2.0) * 0.015, 1 - Math.sin(t * 2.0) * 0.01, 1 + Math.sin(t * 2.0) * 0.015);
+
+            this.parts.leftEar.rotation.set(this.baseEarLeft.x + Math.sin(t * 3) * 0.05, this.baseEarLeft.y, curBaseLZ);
+            this.parts.rightEar.rotation.set(this.baseEarRight.x + Math.sin(t * 3 + 0.8) * 0.05, this.baseEarRight.y, curBaseRZ);
+
+            const sniff = 0.85 + Math.sin(t * 10) * 0.12;
+            this.parts.nose.scale.set(1.15, sniff, 0.65);
+
+            this.parts.tail.rotation.y = Math.sin(t * 2.5) * 0.18;
+
+            this.blinkTimer -= dt;
+            if (this.blinkTimer < 0) {
+              this.blinkTimer = 2.5 + Math.random() * 3.0;
+              this.blinking = 0.15;
+            }
+            if (this.blinking > 0) {
+              this.blinking -= dt;
+              const bRatio = Math.sin((1 - Math.max(0, this.blinking) / 0.15) * Math.PI);
+              const eyeH = 1 - bRatio * 0.92;
+              this.parts.eyes.forEach(e => e.scale.y = eyeH);
+            }
+            break;
+          }
+
+          case 'binky': {
+            const cycle = (t % 1.2) / 1.2;
+            if (cycle < 0.25) {
+              const k = cycle / 0.25;
+              this.group.position.y = -0.18 * k;
+              this.group.scale.set(1.08, 0.90, 1.08);
+            } else if (cycle < 0.75) {
+              const k = (cycle - 0.25) / 0.5;
+              const leap = Math.sin(k * Math.PI);
+              this.group.position.y = leap * 1.75;
+              this.group.rotation.y = k * Math.PI * 2;
+              this.group.rotation.z = Math.sin(k * Math.PI * 2) * 0.35;
+              this.parts.leftEar.rotation.x = this.baseEarLeft.x - 0.6;
+              this.parts.rightEar.rotation.x = this.baseEarRight.x - 0.6;
+              this.earSpring.velLZ = 12;
+            } else {
+              const k = (cycle - 0.75) / 0.25;
+              const land = 1 - k;
+              this.group.position.y = -0.08 * land;
+              this.group.scale.set(1 + 0.08 * land, 1 - 0.08 * land, 1 + 0.08 * land);
+            }
+            break;
+          }
+
+          case 'hop': {
+            const cycle = (t % 1.0) / 1.0;
+            if (cycle < 0.2) {
+              const k = cycle / 0.2;
+              this.group.position.y = -0.12 * k;
+              this.group.scale.set(1.06, 0.92, 1.06);
+            } else if (cycle < 0.7) {
+              const k = (cycle - 0.2) / 0.5;
+              const leap = Math.sin(k * Math.PI);
+              this.group.position.y = leap * 1.2;
+              this.group.position.z = Math.sin(k * Math.PI) * 0.3;
+              this.parts.leftEar.rotation.x = this.baseEarLeft.x + leap * 0.4;
+              this.parts.rightEar.rotation.x = this.baseEarRight.x + leap * 0.4;
+            } else {
+              const k = (cycle - 0.7) / 0.3;
+              this.group.position.y = -0.08 * (1 - k);
+            }
+            break;
+          }
+
+          case 'munch': {
+            const munchCycle = Math.sin(t * 9);
+            this.parts.headGroup.rotation.x = 0.35 + munchCycle * 0.08;
+            this.parts.nose.scale.set(1.15, 0.7 + Math.abs(munchCycle) * 0.3, 0.65);
+            this.parts.frontLeftFoot.position.set(-0.18, 0.50, 0.55);
+            this.parts.frontRightFoot.position.set(0.18, 0.50, 0.55);
+            this.parts.frontLeftFoot.rotation.x = -1.2;
+            this.parts.frontRightFoot.rotation.x = -1.2;
+
+            if (this.parts.carrotObj) {
+              this.parts.carrotObj.position.set(0, 1.10, 0.62 + munchCycle * 0.02);
+            }
+
+            if (Math.sin(t * 9) > 0.8) {
+              spawnCrumbs(new THREE.Vector3(0, 1.45, 0.68));
+            }
+            break;
+          }
+
+          case 'groom': {
+            const washPhase = Math.sin(t * 6);
+            this.parts.headGroup.rotation.x = 0.25;
+            this.parts.headGroup.rotation.y = washPhase * 0.15;
+            this.parts.frontLeftFoot.position.set(-0.15, 1.38 + washPhase * 0.12, 0.50);
+            this.parts.frontRightFoot.position.set(0.15, 1.38 - washPhase * 0.12, 0.50);
+            this.parts.frontLeftFoot.rotation.x = -1.8;
+            this.parts.frontRightFoot.rotation.x = -1.8;
+            this.parts.leftEar.rotation.x = this.baseEarLeft.x + 0.35;
+            this.parts.rightEar.rotation.x = this.baseEarRight.x + 0.35;
+            break;
+          }
+
+          case 'sleep': {
+            this.group.position.y = -0.12 + Math.sin(t * 0.8) * 0.015;
+            this.group.scale.set(1.04, 0.94, 1.02);
+            this.parts.headGroup.rotation.x = 0.35;
+            this.parts.headGroup.position.set(0, 1.50, 0.20);
+            this.parts.leftEar.rotation.x = this.baseEarLeft.x + 0.35;
+            this.parts.rightEar.rotation.x = this.baseEarRight.x + 0.35;
+            
+            this.parts.eyes.forEach(e => e.scale.y = 0.08);
+
+            if (Math.floor(t * 0.7) > Math.floor((t - dt) * 0.7)) spawnZ();
+            break;
+          }
+        }
+      }
+    }
+
+    // ============== 初始化场景 ==============
+    function init() {
+      const canvas = document.getElementById('scene-canvas');
+      state.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      state.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      state.renderer.setSize(window.innerWidth, window.innerHeight);
+      state.renderer.shadowMap.enabled = true;
+      state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      state.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      state.renderer.toneMappingExposure = 1.1;
+      state.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      state.scene = new THREE.Scene();
+      state.scene.background = null;
+      state.scene.fog = new THREE.Fog(0xf5ecd9, 10, 25);
+
+      state.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+      state.camera.position.set(4.0, 2.1, 4.8);
+
+      const ambient = new THREE.AmbientLight(0xfff7ee, 0.75);
+      state.scene.add(ambient);
+
+      const hemi = new THREE.HemisphereLight(0xfff5e0, 0xc9603c, 0.55);
+      state.scene.add(hemi);
+
+      const keyLight = new THREE.DirectionalLight(0xfffaee, 1.6);
+      keyLight.position.set(4.5, 7.5, 3.5);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.set(2048, 2048);
+      keyLight.shadow.camera.left = -3;
+      keyLight.shadow.camera.right = 3;
+      keyLight.shadow.camera.top = 3;
+      keyLight.shadow.camera.bottom = -1.5;
+      keyLight.shadow.camera.near = 0.5;
+      keyLight.shadow.camera.far = 16;
+      keyLight.shadow.bias = -0.0004;
+      keyLight.shadow.radius = 3.5;
+      state.scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0xffc299, 0.45);
+      fillLight.position.set(-4.5, 3.5, -2);
+      state.scene.add(fillLight);
+
+      const rimLight = new THREE.DirectionalLight(0xffe6d9, 0.6);
+      rimLight.position.set(0, 4.5, -5.5);
+      state.scene.add(rimLight);
+
+      const floorTex = createFloorTexture();
+      const floorGeo = new THREE.CircleGeometry(7.5, 64);
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: floorTex,
+        transparent: true,
+        roughness: 0.95,
+        metalness: 0.05
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      state.scene.add(floor);
+
+      state.controls = new OrbitControls(state.camera, canvas);
+      state.controls.enableDamping = true;
+      state.controls.dampingFactor = 0.08;
+      state.controls.minDistance = 3.0;
+      state.controls.maxDistance = 8.0;
+      state.controls.minPolarAngle = 0.2;
+      state.controls.maxPolarAngle = Math.PI / 2 - 0.05;
+      state.controls.target.set(0, 1.10, 0);
+      state.controls.enablePan = false;
+      state.controls.autoRotate = true;
+      state.controls.autoRotateSpeed = 0.4;
+
+      canvas.addEventListener('pointerdown', () => {
+        state.controls.autoRotate = false;
+        state.lastInteraction = state.clock.getElapsedTime();
+      });
+      canvas.addEventListener('wheel', () => {
+        state.controls.autoRotate = false;
+        state.lastInteraction = state.clock.getElapsedTime();
+      });
+
+      state.rabbit = new MasterpieceRabbit();
+      state.scene.add(state.rabbit.group);
+
+      state.ambientParticles = createAmbientParticles();
+      state.scene.add(state.ambientParticles);
+      state.sparkles = createSparkleSystem();
+      state.scene.add(state.sparkles.points);
+      state.zSystem = createZSystem();
+      state.scene.add(state.zSystem.points);
+      state.crumbSystem = createCrumbSystem();
+      state.scene.add(state.crumbSystem.points);
+
+      window.addEventListener('resize', onResize);
+
+      buildUI();
+      animate();
+    }
+
+    function createFloorTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 1024;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(512, 512, 40, 512, 512, 510);
+      g.addColorStop(0, 'rgba(250, 243, 227, 0.98)');
+      g.addColorStop(0.5, 'rgba(234, 217, 187, 0.8)');
+      g.addColorStop(0.85, 'rgba(220, 200, 165, 0.35)');
+      g.addColorStop(1, 'rgba(220, 200, 165, 0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      ctx.strokeStyle = 'rgba(122, 82, 50, 0.08)';
+      ctx.lineWidth = 1.5;
+      for (let i = 1; i <= 5; i++) {
+        ctx.beginPath();
+        ctx.arc(512, 512, i * 90, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    function onResize() {
+      state.camera.aspect = window.innerWidth / window.innerHeight;
+      state.camera.updateProjectionMatrix();
+      state.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ============== 构建交互 UI ==============
+    function buildUI() {
+      // 名字输入与双向绑定
+      const updateName = (newName) => {
+        document.getElementById('rabbit-name').value = newName;
+        document.getElementById('panel-rabbit-name').value = newName;
+        updateStats();
+      };
+
+      document.getElementById('panel-rabbit-name').addEventListener('input', (e) => {
+        document.getElementById('rabbit-name').value = e.target.value;
+        updateStats();
+      });
+
+      document.getElementById('rabbit-name').addEventListener('input', (e) => {
+        document.getElementById('panel-rabbit-name').value = e.target.value;
+        updateStats();
+      });
+
+      document.getElementById('random-name-btn').addEventListener('click', () => {
+        const randomName = namePool[Math.floor(Math.random() * namePool.length)];
+        updateName(randomName);
+        spawnSparkles(new THREE.Vector3(0, 1.2, 0.3), 0xc9603c);
+        showToast('Name: ' + randomName);
+      });
+
+      const quickNamesContainer = document.getElementById('quick-names');
+      ['Mochi', 'Clover', 'Boba', 'Peanut', 'Luna', 'Biscuit', 'Matcha', 'Waffles'].forEach(n => {
+        const chip = document.createElement('span');
+        chip.className = 'name-chip';
+        chip.textContent = n;
+        chip.addEventListener('click', () => {
+          updateName(n);
+          spawnSparkles(new THREE.Vector3(0, 1.2, 0.3), 0xc9603c);
+          showToast('Name: ' + n);
+        });
+        quickNamesContainer.appendChild(chip);
+      });
+
+      const setupColorGroup = (containerId, nameId, palette, stateKey, nameKey, partKey, toastPrefix, sparklePos) => {
+        const container = document.getElementById(containerId);
+        palette.forEach(p => {
+          const sw = document.createElement('div');
+          sw.className = 'swatch' + (p.color === state.current[stateKey] ? ' active' : '');
+          sw.style.background = p.color;
+          sw.title = p.name;
+          sw.addEventListener('mouseenter', () => {
+            state.rabbit.previewColor(partKey, p.color);
+            document.getElementById(nameId).textContent = p.name;
+          });
+          sw.addEventListener('mouseleave', () => {
+            state.rabbit.clearPreview();
+            document.getElementById(nameId).textContent = state.current[nameKey];
+          });
+          sw.addEventListener('click', () => {
+            state.current[stateKey] = p.color;
+            state.current[nameKey] = p.name;
+            state.rabbit.setColor(partKey, p.color);
+            container.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+            sw.classList.add('active');
+            spawnSparkles(sparklePos, new THREE.Color(p.color).getHex());
+            showToast(toastPrefix + ': ' + p.name);
+            updateStats();
+          });
+          container.appendChild(sw);
+        });
+      };
+
+      setupColorGroup('body-swatches', 'body-name', palettes.body, 'body', 'bodyName', 'body', 'Coat', new THREE.Vector3(0, 1.2, 0.3));
+      setupColorGroup('inner-swatches', 'inner-name', palettes.inner, 'inner', 'innerName', 'inner', 'Inner Ear', new THREE.Vector3(0, 2.1, 0.2));
+      setupColorGroup('eyes-swatches', 'eyes-name', palettes.eyes, 'eyes', 'eyesName', 'eyes', 'Eyes', new THREE.Vector3(0, 1.75, 0.5));
+      setupColorGroup('nose-swatches', 'nose-name', palettes.nose, 'nose', 'noseName', 'nose', 'Nose', new THREE.Vector3(0, 1.65, 0.6));
+      setupColorGroup('pattern-swatches', 'body-name', palettes.pattern, 'pattern', 'patternName', 'pattern', 'Marking Color', new THREE.Vector3(0, 1.0, 0));
+
+      const patternPills = document.getElementById('pattern-pills');
+      patternOptions.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'pill-btn' + (p.id === state.current.patternType ? ' active' : '');
+        btn.textContent = p.name;
+        btn.addEventListener('click', () => {
+          state.current.patternType = p.id;
+          state.rabbit.setPattern(p.id);
+          patternPills.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          showToast('Pattern: ' + p.name);
+        });
+        patternPills.appendChild(btn);
+      });
+
+      const earPills = document.getElementById('ear-pills');
+      earOptions.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'pill-btn' + (p.id === state.current.earStyle ? ' active' : '');
+        btn.textContent = p.name;
+        btn.addEventListener('click', () => {
+          state.current.earStyle = p.id;
+          state.rabbit.setEarStyle(p.id);
+          earPills.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          showToast('Ears: ' + p.name);
+        });
+        earPills.appendChild(btn);
+      });
+
+      const accPills = document.getElementById('accessory-pills');
+      accessoryOptions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'pill-btn' + (a.id === state.current.accessory ? ' active' : '');
+        btn.textContent = a.name;
+        btn.addEventListener('click', () => {
+          state.current.accessory = a.id;
+          state.rabbit.setAccessory(a.id);
+          accPills.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          showToast('Accessory: ' + a.name);
+          spawnSparkles(new THREE.Vector3(0, 1.4, 0.35), 0xffd154);
+        });
+        accPills.appendChild(btn);
+      });
+
+      const actionGrid = document.getElementById('action-grid');
+      actions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn' + (a.id === state.current.action ? ' active' : '');
+        btn.dataset.action = a.id;
+        btn.innerHTML = '<div class="action-icon">' + a.icon + '</div><span class="action-label">' + a.name + '</span>';
+        btn.addEventListener('click', () => {
+          state.current.action = a.id;
+          state.rabbit.setState(a.id);
+          actionGrid.querySelectorAll('.action-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          showToast('Behavior: ' + a.name);
+          if (a.id === 'binky' || a.id === 'hop') {
+            spawnSparkles(new THREE.Vector3(0, 0.5, 0), 0xffd9a3);
+          }
+        });
+        actionGrid.appendChild(btn);
+      });
+
+      document.getElementById('randomize-btn').addEventListener('click', () => {
+        const rb = palettes.body[Math.floor(Math.random() * palettes.body.length)];
+        const ri = palettes.inner[Math.floor(Math.random() * palettes.inner.length)];
+        const re = palettes.eyes[Math.floor(Math.random() * palettes.eyes.length)];
+        const rn = palettes.nose[Math.floor(Math.random() * palettes.nose.length)];
+        const rp = palettes.pattern[Math.floor(Math.random() * palettes.pattern.length)];
+        const rpt = patternOptions[Math.floor(Math.random() * patternOptions.length)];
+        const reo = earOptions[Math.floor(Math.random() * earOptions.length)];
+        const racc = accessoryOptions[Math.floor(Math.random() * accessoryOptions.length)];
+        const randomName = namePool[Math.floor(Math.random() * namePool.length)];
+
+        state.current.body = rb.color; state.current.bodyName = rb.name;
+        state.current.inner = ri.color; state.current.innerName = ri.name;
+        state.current.eyes = re.color; state.current.eyesName = re.name;
+        state.current.nose = rn.color; state.current.noseName = rn.name;
+        state.current.pattern = rp.color; state.current.patternName = rp.name;
+        state.current.patternType = rpt.id;
+        state.current.earStyle = reo.id;
+        state.current.accessory = racc.id;
+
+        state.rabbit.colors.body = rb.color;
+        state.rabbit.colors.inner = ri.color;
+        state.rabbit.colors.eyes = re.color;
+        state.rabbit.colors.nose = rn.color;
+        state.rabbit.colors.pattern = rp.color;
+        state.rabbit.applyColors();
+        state.rabbit.setPattern(rpt.id);
+        state.rabbit.setEarStyle(reo.id);
+        state.rabbit.setAccessory(racc.id);
+
+        updateName(randomName);
+
+        document.getElementById('body-name').textContent = rb.name;
+        document.getElementById('inner-name').textContent = ri.name;
+        document.getElementById('eyes-name').textContent = re.name;
+        document.getElementById('nose-name').textContent = rn.name;
+
+        document.querySelectorAll('#body-swatches .swatch').forEach((s, i) => s.classList.toggle('active', palettes.body[i].name === rb.name));
+        document.querySelectorAll('#inner-swatches .swatch').forEach((s, i) => s.classList.toggle('active', palettes.inner[i].name === ri.name));
+        document.querySelectorAll('#eyes-swatches .swatch').forEach((s, i) => s.classList.toggle('active', palettes.eyes[i].name === re.name));
+        document.querySelectorAll('#nose-swatches .swatch').forEach((s, i) => s.classList.toggle('active', palettes.nose[i].name === rn.name));
+        document.querySelectorAll('#pattern-swatches .swatch').forEach((s, i) => s.classList.toggle('active', palettes.pattern[i].name === rp.name));
+        patternPills.querySelectorAll('.pill-btn').forEach(s => s.classList.toggle('active', s.textContent === rpt.name));
+        earPills.querySelectorAll('.pill-btn').forEach(s => s.classList.toggle('active', s.textContent === reo.name));
+        accPills.querySelectorAll('.pill-btn').forEach(s => s.classList.toggle('active', s.textContent === racc.name));
+
+        for (let i = 0; i < 3; i++) {
+          setTimeout(() => spawnSparkles(new THREE.Vector3(0, 0.8 + i * 0.5, 0), 0xffd9a3), i * 100);
+        }
+        showToast('A wonderful new companion appears!');
+        updateStats();
+      });
+
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        state.camera.position.set(4.0, 2.1, 4.8);
+        state.controls.target.set(0, 1.10, 0);
+        state.controls.update();
+        state.controls.autoRotate = true;
+        showToast('Camera angle centered');
+      });
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const name = document.getElementById('rabbit-name').value || 'Mochi';
+      const seed = name.charCodeAt(0) || 77;
+      const fluff = ['A+', 'S', 'A++', 'A', 'S+'][seed % 5];
+      const whimsy = 80 + (seed * 7) % 20;
+      const charm = 85 + (seed * 11) % 15;
+      document.getElementById('stat-fluff').textContent = fluff;
+      document.getElementById('stat-whimsy').textContent = whimsy;
+      document.getElementById('stat-charm').textContent = charm;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+    }
+
+    // ============== 动画渲染主循环 ==============
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(state.clock.getDelta(), 0.05);
+      const t = state.clock.getElapsedTime();
+
+      state.controls.update();
+      state.rabbit.update(dt);
+      updateAmbient(dt, t);
+      updateSparkles(dt);
+      updateZs(dt);
+      updateCrumbs(dt);
+
+      if (!state.controls.autoRotate && t - state.lastInteraction > 5) {
+        state.controls.autoRotate = true;
+      }
+
+      state.renderer.render(state.scene, state.camera);
+    }
+
+    init();
+  </script>
+</body>
+</html>
